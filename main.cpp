@@ -56,7 +56,7 @@ std::string generate_random_hex() {
 
 BigInt PRIME = convert_from_hex<BigInt>("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF43");
 
-std::vector<BigInt> generate_random_vector(uint32_t size) {
+std::vector<BigInt> generate_random_coefficients(uint32_t size) {
     std::vector<BigInt> coefficients;
     for (uint32_t i = 0; i < size; i++) {
         BigInt random = convert_from_hex<BigInt>(generate_random_hex<KEY_BYTES_SIZE>());
@@ -66,7 +66,7 @@ std::vector<BigInt> generate_random_vector(uint32_t size) {
     return coefficients;
 }
 
-BigInt calculate_function(
+BigInt calculate_polynomial(
     std::vector<BigInt>& coefficients,
     uint8_t argument
 ) {
@@ -84,15 +84,15 @@ std::vector<Point> split(
     uint8_t entry_threshold, 
     const BigInt& secret
 ) {
-    std::vector<BigInt> coefficients = generate_random_vector(entry_threshold - 1);
+    std::vector<BigInt> coefficients = generate_random_coefficients(entry_threshold - 1);
     coefficients.push_back(secret);
 
-    std::vector<Point> result;
+    std::vector<Point> points;
     for (uint8_t i = 1; i <= shares_count; i++) {
-        result.push_back(Point(i, calculate_function(coefficients, i)));
+        points.push_back(Point(i, calculate_polynomial(coefficients, i)));
     }
 
-    return result;
+    return points;
 }
 
 BigInt recover(std::vector<Point>& shares) {
@@ -154,7 +154,7 @@ int main(int args_count, char** args_value) {
         std::cin >> shares_count >> entry_threshold >> string_secret;
 
         if (shares_count < entry_threshold) {
-            std::cout << "Shares count must be higher then entry threshold" << std::endl;
+            std::cout << "Shares count must be higher than entry threshold" << std::endl;
             return 1;
         }
 
